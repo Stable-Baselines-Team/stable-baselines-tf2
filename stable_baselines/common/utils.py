@@ -12,7 +12,7 @@ def set_random_seed(seed):
     """
     random.seed(seed)
     np.random.seed(seed)
-    tf.seed(seed)
+    tf.random.set_seed(seed)
 
 
 def explained_variance(y_pred, y_true):

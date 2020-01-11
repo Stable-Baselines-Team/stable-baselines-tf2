@@ -57,6 +57,17 @@ class DummyVecEnv(VecEnv):
         for env in self.envs:
             env.close()
 
+    def seed(self, seed, indices=None):
+        """
+        :param seed: (int or [int])
+        :param indices: ([int])
+        """
+        indices = self._get_indices(indices)
+        if not hasattr(seed, 'len'):
+            seed = [seed] * len(indices)
+        assert len(seed) == len(indices)
+        return [self.envs[i].seed(seed[i]) for i in indices]
+
     def get_images(self):
         return [env.render(mode='rgb_array') for env in self.envs]
 
