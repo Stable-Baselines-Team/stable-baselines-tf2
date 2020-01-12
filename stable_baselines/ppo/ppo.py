@@ -207,7 +207,6 @@ class PPO(BaseRLModel):
                     values = tf.reshape(values, [-1])
 
                     policy_loss = self.policy_loss(advantage, log_prob, old_log_prob, clip_range)
-
                     value_loss = self.value_loss(values, old_values, return_batch, clip_range_vf)
 
                     # Entropy loss favor exploration
