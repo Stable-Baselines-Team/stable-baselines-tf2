@@ -5,6 +5,34 @@ Changelog
 
 For download links, please look at `Github release page <https://github.com/hill-a/stable-baselines/releases>`_.
 
+Pre-Release 3.0.0a0 (WIP)
+--------------------------
+
+**TensorFlow 2 Version**
+
+Breaking Changes:
+^^^^^^^^^^^^^^^^^
+- Drop support for tensorflow 1.x, TensorFlow >=2.1.0 is required
+- New dependency: tensorflow-probability>=0.8.0 is now required
+- Drop support for pretrain, in favor of https://github.com/HumanCompatibleAI/imitation
+- Drop support of GAIL, in favor of https://github.com/HumanCompatibleAI/imitation
+- Drop support of MPI
+
+New Features:
+^^^^^^^^^^^^^
+
+Bug Fixes:
+^^^^^^^^^^
+
+Deprecations:
+^^^^^^^^^^^^^
+
+Others:
+^^^^^^^
+
+Documentation:
+^^^^^^^^^^^^^^
+
 
 Pre-Release 2.10.0a0 (WIP)
 --------------------------

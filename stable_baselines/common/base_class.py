@@ -177,58 +177,9 @@ class BaseRLModel(ABC):
         """
         return self.env
 
-    @staticmethod
-    def check_env(env, observation_space, action_space):
-        """
-        Checks the validity of the environment and returns if it is coherent
-        Checked parameters:
-         - observation_space
-         - action_space
-        :return: (bool) True if environment seems to be coherent
-        """
-        if observation_space != env.observation_space:
-            return False
-        if action_space != env.action_space:
-            return False
-        # return true if no check failed
-        return True
-
     def set_env(self, env):
         """
-        Checks the validity of the environment, and if it is coherent, set it as the current environment.
-        Furthermore wrap any non vectorized env into a vectorized
-        checked parameters:
-         - observation_space
-         - action_space
-
         :param env: (gym.Env) The environment for learning a policy
-        """
-        if self.check_env(env, self.observation_space, self.action_space) is False:
-            raise ValueError("The given environment is not compatible with model: observation and action spaces do not match")
-        # it must be coherent now
-        # if it is not a VecEnv, make it a VecEnv
-        if not isinstance(env, VecEnv):
-            if self.verbose >= 1:
-                print("Wrapping the env in a DummyVecEnv.")
-            env = DummyVecEnv([lambda: env])
-        self.n_envs = env.num_envs
-        self.env = env
-
-    def pretrain(self, dataset, n_epochs=10, learning_rate=1e-4,
-                 adam_epsilon=1e-8, val_interval=None):
-        """
-        Pretrain a model using behavior cloning:
-        supervised learning given an expert dataset.
-
-        NOTE: only Box and Discrete spaces are supported for now.
-
-        :param dataset: (ExpertDataset) Dataset manager
-        :param n_epochs: (int) Number of iterations on the training set
-        :param learning_rate: (float) Learning rate
-        :param adam_epsilon: (float) the epsilon value for the adam optimizer
-        :param val_interval: (int) Report training and validation losses every n epochs.
-            By default, every 10th of the maximum number of epochs.
-        :return: (BaseRLModel) the pretrained model
         """
         raise NotImplementedError()
 
