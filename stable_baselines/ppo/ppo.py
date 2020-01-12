@@ -154,9 +154,10 @@ class PPO(BaseRLModel):
 
         return obs
 
+    @tf.function
     def policy_loss(self, advantage, log_prob, old_log_prob, clip_range):
         # Normalize advantage
-        advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+        advantage = (advantage - tf.reduce_mean(advantage)) / (tf.math.reduce_std(advantage) + 1e-8)
 
         # ratio between old and new policy, should be one at the first iteration
         ratio = tf.exp(log_prob - old_log_prob)
@@ -165,6 +166,7 @@ class PPO(BaseRLModel):
         policy_loss_2 = advantage * tf.clip_by_value(ratio, 1 - clip_range, 1 + clip_range)
         return - tf.reduce_mean(tf.minimum(policy_loss_1, policy_loss_2))
 
+    @tf.function
     def value_loss(self, values, old_values, return_batch, clip_range_vf):
         if clip_range_vf is None:
             # No clipping
