@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 # flake8: noqa F401
 from stable_baselines.common.vec_env.base_vec_env import AlreadySteppingError, NotSteppingError, VecEnv, VecEnvWrapper, \
     CloudpickleWrapper
