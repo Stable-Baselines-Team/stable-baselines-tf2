@@ -88,6 +88,7 @@ class PPOPolicy(BasePolicy):
             #     module.apply(partial(self.init_weights, gain=gain))
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate(1), epsilon=self.adam_epsilon)
 
+    @tf.function
     def call(self, obs, deterministic=False):
         latent_pi, latent_vf = self._get_latent(obs)
         value = self.value_net(latent_vf)
@@ -115,6 +116,7 @@ class PPOPolicy(BasePolicy):
         action, _ = self._get_action_dist_from_latent(latent_pi, deterministic=deterministic)
         return tf.stop_gradient(action).numpy()
 
+    @tf.function
     def evaluate_actions(self, obs, action, deterministic=False):
         """
         Evaluate actions according to the current policy,
