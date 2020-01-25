@@ -112,6 +112,7 @@ class TD3Policy(BasePolicy):
     def make_critic(self):
         return Critic(**self.net_args)
 
+    @tf.function
     def call(self, obs):
         return self.actor(obs)
 

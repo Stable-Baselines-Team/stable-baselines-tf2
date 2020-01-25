@@ -126,14 +126,8 @@ class TD3(BaseRLModel):
         self.critic_target.soft_update(self.critic, self.tau)
         self.actor_target.soft_update(self.actor, self.tau)
 
-    def train(self, gradient_steps, batch_size=100, policy_delay=2):
-        # self._update_learning_rate()
-
-        for gradient_step in range(gradient_steps):
-
-            # Sample replay buffer
-            obs, action, next_obs, done, reward = self.replay_buffer.sample(batch_size)
-
+    @tf.function
+    def _train_critic(self, obs, action, next_obs, done, reward):
             with tf.GradientTape() as critic_tape:
                 critic_tape.watch(self.critic.trainable_variables)
                 critic_loss = self.critic_loss(obs, action, next_obs, done, reward)
@@ -142,17 +136,31 @@ class TD3(BaseRLModel):
             grads_critic = critic_tape.gradient(critic_loss, self.critic.trainable_variables)
             self.critic.optimizer.apply_gradients(zip(grads_critic, self.critic.trainable_variables))
 
+    @tf.function
+    def _train_actor(self, obs):
+        with tf.GradientTape() as actor_tape:
+            actor_tape.watch(self.actor.trainable_variables)
+            # Compute actor loss
+            actor_loss = self.actor_loss(obs)
+
+        # Optimize the actor
+        grads_actor = actor_tape.gradient(actor_loss, self.actor.trainable_variables)
+        self.actor.optimizer.apply_gradients(zip(grads_actor, self.actor.trainable_variables))
+
+    def train(self, gradient_steps, batch_size=100, policy_delay=2):
+        # self._update_learning_rate()
+
+        for gradient_step in range(gradient_steps):
+
+            # Sample replay buffer
+            obs, action, next_obs, done, reward = self.replay_buffer.sample(batch_size)
+
+            self._train_critic(obs, action, next_obs, done, reward)
 
             # Delayed policy updates
             if gradient_step % policy_delay == 0:
-                with tf.GradientTape() as actor_tape:
-                    actor_tape.watch(self.actor.trainable_variables)
-                    # Compute actor loss
-                    actor_loss = self.actor_loss(obs)
 
-                # Optimize the actor
-                grads_actor = actor_tape.gradient(actor_loss, self.actor.trainable_variables)
-                self.actor.optimizer.apply_gradients(zip(grads_actor, self.actor.trainable_variables))
+                self._train_actor(obs)
 
                 # Update the frozen target models
                 self.update_targets()
@@ -197,7 +205,6 @@ class TD3(BaseRLModel):
 
         return self
 
-
     def collect_rollouts(self, env, n_episodes=1, n_steps=-1, action_noise=None,
                          deterministic=False, callback=None,
                          learning_starts=0, num_timesteps=0,
@@ -238,11 +245,10 @@ class TD3(BaseRLModel):
                 if num_timesteps < learning_starts:
                     # Warmup phase
                     unscaled_action = np.array([self.action_space.sample()])
+                    # Rescale the action from [low, high] to [-1, 1]
+                    scaled_action = self.scale_action(unscaled_action)
                 else:
-                    unscaled_action = self.predict(obs)
-
-                # Rescale the action from [low, high] to [-1, 1]
-                scaled_action = self.scale_action(unscaled_action)
+                    scaled_action = self.policy.call(obs)
 
                 # Add noise to the action (improve exploration)
                 if action_noise is not None:
